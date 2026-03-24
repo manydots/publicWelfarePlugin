@@ -4,7 +4,7 @@ on:
 
 jobs:
   build-client:
-    runs-on: windows-2019
+    runs-on: windows-latest
     permissions:
       contents: write
 
@@ -19,9 +19,7 @@ jobs:
         shell: bash
         run: |
           new_tag="client-v1.0.0"
-          
           latest=$(gh release list --json tagName --jq '.[0].tagName' 2>/dev/null || true)
-          
           if [ -n "$latest" ] && [[ $latest =~ client-v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             major=${BASH_REMATCH[1]}
             minor=${BASH_REMATCH[2]}
@@ -29,16 +27,19 @@ jobs:
             new_patch=$((patch + 1))
             new_tag="client-v$major.$minor.$new_patch"
           fi
-          
-          echo "新版本号: $new_tag"
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 设置VS环境
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+          vsversion: 2022
+
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:PlatformToolset=v142
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:LanguageStandard=stdcpp17 /p:AdditionalOptions="/Zc:char8_t-" /p:ForceUsingUtf8Encoding=false
 
       - name: 收集文件
         run: |
