@@ -31,15 +31,15 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 强制 MSVC 以 GBK 编码读取源码
+      # 允许中文标识符 + GBK编码
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:ClCompile="/source-charset:gbk /execution-charset:gbk"
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:AdditionalOptions="/Zc:char8_t- /utf-8 /permissive"
 
       - name: 收集编译的插件
         run: |
           mkdir output
-          xcopy "Client\Fd\x86\Home\Fd.dll" "output\" /y /s /q
+          xcopy "Client\Fd\x86\Home\Fd.dll" "output\" /y /q
           xcopy "Client\Fd\*.dll" "output\" /y /s /q
 
       - name: 上传到GitHub Releases
