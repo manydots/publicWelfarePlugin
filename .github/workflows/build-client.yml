@@ -19,6 +19,7 @@ jobs:
           $files = Get-ChildItem -Path "Client\Fd\" -Include *.cpp,*.h -Recurse
           foreach ($file in $files) {
             $content = Get-Content $file.FullName -Encoding Default -Raw
+            # 强制保存为 UTF-8 with BOM（VS 编译器完全兼容）
             Set-Content $file.FullName -Value $content -Encoding UTF8
           }
 
@@ -39,18 +40,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 设置VS环境
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x86
-          vsversion: 2022
-
       - name: 编译 Client/Fd/Fd.sln
         run: |
           msbuild "Client/Fd/Fd.sln" `
             /p:Configuration=Home `
             /p:Platform=x86 `
-            /p:LanguageStandard=stdcpp17
+            /p:LanguageStandard=stdcpp17 `
+            /p:Charset=Unicode `
+            /p:CharacterSet=Unicode `
+            /p:AdditionalOptions="/utf-8 /source-charset:utf-8 /execution-charset:utf-8"
 
       - name: 整理编译插件
         run: |
