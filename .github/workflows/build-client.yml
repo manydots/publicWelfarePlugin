@@ -1,11 +1,10 @@
 name: Client插件编译
-
 on:
   workflow_dispatch:
 
 jobs:
   build-client:
-    runs-on: windows-latest
+    runs-on: windows-2019
     permissions:
       contents: write
 
@@ -36,15 +35,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 安装MSBuild
-        uses: microsoft/setup-msbuild@v2
-
-      # 允许中文变量名 + 兼容GBK编码
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:AdditionalOptions="/permissive- /Zc:strictStrings- /source-charset:GBK"
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:PlatformToolset=v142
 
-      - name: 收集编译的插件
+      - name: 收集文件
         run: |
           mkdir output
           xcopy "Client\Fd\x86\Home\*.dll" "output\" /y /s /q
