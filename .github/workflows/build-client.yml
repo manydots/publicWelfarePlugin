@@ -37,9 +37,16 @@ jobs:
           arch: x86
           vsversion: 2022
 
+      # 无编码校验 + 宽松模式 + 中文兼容
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:LanguageStandard=stdcpp17 /p:AdditionalOptions="/Zc:char8_t-" /p:ForceUsingUtf8Encoding=false
+          msbuild "Client/Fd/Fd.sln" `
+            /p:Configuration=Home `
+            /p:Platform=x86 `
+            /p:LanguageStandard=stdcpp17 `
+            /p:AdditionalOptions="/permissive /Zc:char8_t- /Zc:strictStrings- /utf-8- /source-charset:.936" `
+            /p:Charset=Unicode `
+            /p:ForceUsingUtf8Encoding=false
 
       - name: 收集文件
         run: |
