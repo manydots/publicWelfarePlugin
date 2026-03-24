@@ -1,0 +1,46 @@
+name: CMake编译
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      # 安装依赖
+      - name: 安装32位CMake编译环境
+        run: |
+          sudo apt update
+          sudo apt install -y gcc gcc-multilib g++-multilib wget
+          cd /usr/local
+          wget https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6-linux-x86_64.tar.gz
+          tar -zxvf cmake-3.22.6-linux-x86_64.tar.gz
+          sudo ln -sf /usr/local/cmake-3.22.6-linux-x86_64/bin/cmake /usr/bin/cmake
+          cmake --version
+
+      # 编译 monitor
+      - name: 编译libfd_monitor.so
+        run: |
+          cd Server/monitor
+          sed -i '1s/^.//' CMakeLists.txt
+          rm -rf build && mkdir build && cd build
+          cmake .. -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
+          make -j4
+
+      # 编译 server
+      - name: 编译libfd.so
+        run: |
+          cd Server/server
+          sed -i '1s/^.//' CMakeLists.txt
+          rm -rf build && mkdir build && cd build
+          cmake .. -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
+          make -j4
+
+      - name: 编译完成
+        run: echo "插件编译成功"
