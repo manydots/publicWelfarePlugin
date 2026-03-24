@@ -32,17 +32,16 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 编译 x86 平台
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /t:Rebuild /p:Configuration=Release /p:PlatformTarget=x86 /p:PlatformToolset=v143 /p:CXX_STANDARD=17
+          msbuild "Client/Fd/Fd.sln" /t:Rebuild /p:Configuration=Release /p:PlatformToolset=v143 /p:CXX_STANDARD=17
 
-      # x86/Release 取文件
       - name: 收集编译的插件
         run: |
           mkdir output
-          copy "Client\Fd\x86\Release\Fd.dll" "output\"
-          copy "Client\Fd\Fd.dll" "output\"
+          xcopy "Client\Fd\Fd.dll" "output\" /y /q
+          xcopy "Client\Fd\*\Release\Fd.dll" "output\" /y /q /s
+          xcopy "Client\Fd\Release\Fd.dll" "output\" /y /q
 
       # 发布到 Releases
       - name: 上传到GitHub Releases
