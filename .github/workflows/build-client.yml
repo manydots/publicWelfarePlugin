@@ -45,7 +45,7 @@ jobs:
             /p:LanguageStandard=stdcpp17 `
             /p:Charset=Unicode `
             /p:ForceUsingUtf8Encoding=false `
-            /p:ClCompile="/permissive /Zc:char8_t- /Zc:strictStrings- /utf-8- /source-charset:GBK /execution-charset:GBK"
+            /p:ClCompile="/permissive- /Zc:char8_t- /Zc:strictStrings- /utf-8 /source-charset:GBK /execution-charset:GBK"
 
       - name: 整理编译插件
         run: |
