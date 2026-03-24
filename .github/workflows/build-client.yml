@@ -15,7 +15,6 @@ jobs:
         with:
           submodules: true
 
-      # 客户端版本号
       - name: 生成Client发布版本号
         id: version
         shell: bash
@@ -32,48 +31,67 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 对于 C++ 项目，安装 Visual Studio 构建工具
-      - name: 安装 Visual Studio 构建工具
+      # 查看配置
+      - name: 查看项目配置
+        shell: cmd
         run: |
-          choco install visualstudio2022buildtools -y
-          choco install visualstudio2022-workload-vctools -y
-        continue-on-error: true
+          cd Client\Fd
+          echo "=== Solution file content (first 50 lines) ==="
+          type Fd.sln | more
+          echo ""
+          echo "=== Searching for configurations in vcxproj ==="
+          findstr /i "Configuration" Fd.vcxproj
+          echo ""
+          echo "=== Trying to build with default configuration ==="
+          msbuild Fd.sln /p:Configuration=Release /target:ValidateSolutionConfiguration
 
-      # 编译项目 - 使用 Win32 平台
-      - name: 编译 Client/Fd/Fd.sln
+      - name: 编译项目
+        shell: cmd
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143
+          cd Client\Fd
+          
+          # 方式1：不指定平台
+          echo "=== Trying with no platform ==="
+          msbuild Fd.sln /p:Configuration=Release
+          
+          if %errorlevel% neq 0 (
+            echo "=== Trying with x86 platform ==="
+            msbuild Fd.sln /p:Configuration=Release /p:Platform=x86
+          )
+          
+          if %errorlevel% neq 0 (
+            echo "=== Trying with AnyCPU platform ==="
+            msbuild Fd.sln /p:Configuration=Release /p:Platform="Any CPU"
+          )
+          
+          if %errorlevel% neq 0 (
+            echo "=== Trying to build vcxproj directly ==="
+            msbuild Fd.vcxproj /p:Configuration=Release /p:Platform=Win32
+          )
           
       - name: 收集编译的插件
         run: |
           mkdir output
-          echo "Searching for compiled dll files..."
+          echo "Searching for Fd.dll..."
           
-          # 显示目录结构以便调试
-          echo "Directory structure:"
-          dir /s /b Client\Fd\*.dll
-          
-          # 查找 Fd.dll 文件（可能在多个位置）
-          if exist "Client\Fd\Fd.dll" (
-            echo "Found Fd.dll in Client\Fd"
-            copy "Client\Fd\Fd.dll" "output\"
-          ) elseif exist "Client\Fd\Win32\Release\Fd.dll" (
-            echo "Found Fd.dll in Win32\Release"
-            copy "Client\Fd\Win32\Release\Fd.dll" "output\"
-          ) elseif exist "Client\Fd\Release\Fd.dll" (
-            echo "Found Fd.dll in Release"
-            copy "Client\Fd\Release\Fd.dll" "output\"
-          ) else (
-            echo "Fd.dll not found in common locations!"
-            echo "Searching all locations:"
-            dir /s Client\Fd\Fd.dll
+          # 搜索所有位置的 Fd.dll
+          for /r Client %%f in (Fd.dll) do (
+            echo "Found: %%f"
+            copy "%%f" output\
           )
           
           echo "Files in output:"
           dir output
+          if exist output\Fd.dll (
+            echo "Successfully collected Fd.dll"
+          ) else (
+            echo "ERROR: Fd.dll not found!"
+            echo "Full directory listing:"
+            dir /s Client
+          )
 
-      # 发布到 Releases
       - name: 上传到GitHub Releases
+        if: success() && hashFiles('output/Fd.dll') != ''
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
