@@ -4,7 +4,7 @@
 
 ```
 ./github/workflows/build-server.yml  服务端插件
-./github/workflows/build-client.yml  客户端插件[编译失败]
+./github/workflows/build-client.yml  客户端插件[重命名中文函数]
 ```
 
 - Client(客户端插件)

@@ -50,17 +50,22 @@ jobs:
             /p:LanguageStandard=stdcpp17 `
             /p:Charset=Unicode `
             /p:CharacterSet=Unicode `
-            /p:AdditionalOptions="/utf-8 /source-charset:utf-8 /execution-charset:utf-8"
+            /p:AdditionalOptions="/utf-8 /source-charset:utf-8 /execution-charset:utf-8 /Zc:char8_t-"
+        shell: pwsh
 
       - name: 整理编译插件
         run: |
-          mkdir output
-          if (Test-Path "Client\Fd\x86\Home\*.dll") {
-            xcopy "Client\Fd\x86\Home\*.dll" "output\" /y /s /q
+          # 创建输出目录
+          mkdir output -Force
+          # 优先复制标准输出路径
+          if (Test-Path "Client\Fd\x86\Home\Fd.dll") {
+            xcopy "Client\Fd\x86\Home\Fd.dll" "output" /y /s /q
           }
-          if (Test-Path "Client\Fd\*.dll") {
-            xcopy "Client\Fd\*.dll" "output\" /y /s /q
+          # 兼容根目录输出
+          if (Test-Path "Client\Fd\Fd.dll") {
+            xcopy "Client\Fd\Fd.dll" "output" /y /s /q
           }
+        shell: pwsh
 
       - name: 上传到GitHub Releases
         uses: softprops/action-gh-release@v2
