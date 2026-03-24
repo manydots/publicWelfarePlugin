@@ -12,14 +12,15 @@ jobs:
       - name: 拉取代码
         uses: actions/checkout@v4
         with:
-          submodules: true
+          sparse-checkout: |
+            Client
+          sparse-checkout-cone-mode: false
 
       - name: 编码转换
         run: |
           $files = Get-ChildItem -Path "Client\Fd\" -Include *.cpp,*.h -Recurse
           foreach ($file in $files) {
             $content = Get-Content $file.FullName -Encoding Default -Raw
-            # 强制保存为 UTF-8 with BOM（VS 编译器完全兼容）
             Set-Content $file.FullName -Value $content -Encoding UTF8
           }
 
@@ -39,6 +40,12 @@ jobs:
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 设置VS环境
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+          vsversion: 2022
 
       - name: 编译 Client/Fd/Fd.sln
         run: |
