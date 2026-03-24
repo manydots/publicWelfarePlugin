@@ -34,14 +34,12 @@ jobs:
 
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /t:Rebuild /p:Configuration=Release /p:PlatformToolset=v143 /p:CXX_STANDARD=17
-
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release /p:Platform="Any CPU"
+          
       - name: 收集编译的插件
         run: |
           mkdir output
-          xcopy "Client\Fd\Fd.dll" "output\" /y /q
-          xcopy "Client\Fd\*\Release\Fd.dll" "output\" /y /q /s
-          xcopy "Client\Fd\Release\Fd.dll" "output\" /y /q
+          xcopy "Client\Fd\*.dll" "output\" /y /s /q
 
       # 发布到 Releases
       - name: 上传到GitHub Releases
