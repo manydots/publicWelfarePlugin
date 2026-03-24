@@ -15,9 +15,6 @@ jobs:
         with:
           submodules: true
 
-      - name: 设置系统编码为 GBK
-        run: chcp 936
-
       - name: 生成Client发布版本号
         id: version
         shell: bash
@@ -34,14 +31,15 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 编译命令
+      # MSVC 使用 GB2312 编码读取源代码
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:AdditionalOptions="/utf-8" /p:CharacterSet=Unicode
 
       - name: 收集编译的插件
         run: |
           mkdir output
+          xcopy "Client\Fd\x86\Home\Fd.dll" "output\" /y /s /q
           xcopy "Client\Fd\*.dll" "output\" /y /s /q
 
       - name: 上传到GitHub Releases
