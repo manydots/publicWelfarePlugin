@@ -20,10 +20,18 @@ jobs:
         shell: bash
         run: |
           new_tag="client-v1.0.0"
+          
           latest=$(gh release list --json tagName --jq '.[0].tagName' 2>/dev/null || true)
-          if [[ -n "$latest" && $latest =~ client-v([0-9]+)\.([0-9]+) ]]; then
-            new_tag="client-v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3]+1))"
+          
+          if [ -n "$latest" ] && [[ $latest =~ client-v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            major=${BASH_REMATCH[1]}
+            minor=${BASH_REMATCH[2]}
+            patch=${BASH_REMATCH[3]}
+            new_patch=$((patch + 1))
+            new_tag="client-v$major.$minor.$new_patch"
           fi
+          
+          echo "新版本号: $new_tag"
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -31,15 +39,15 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 允许中文标识符 + GBK编码
+      # 允许中文变量名 + 兼容GBK编码
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:AdditionalOptions="/Zc:char8_t- /utf-8 /permissive"
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:AdditionalOptions="/permissive- /Zc:strictStrings- /source-charset:GBK"
 
       - name: 收集编译的插件
         run: |
           mkdir output
-          xcopy "Client\Fd\x86\Home\Fd.dll" "output\" /y /q
+          xcopy "Client\Fd\x86\Home\*.dll" "output\" /y /s /q
           xcopy "Client\Fd\*.dll" "output\" /y /s /q
 
       - name: 上传到GitHub Releases
