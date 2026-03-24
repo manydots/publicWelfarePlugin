@@ -1,8 +1,8 @@
-# 70S2开源插件
+# S2开源插件
 
-- Client(客户端开源原版插件)
+- Client(客户端插件)
   Fd: Fd.dll（开启怪物变身riding.cpp）
-- Server(服务端回忆录开源插件，自定义配置功能)
+- Server(服务端插件)
   monitor: fd_monitor.so（/home/neople/monitor）
   server: fd.so（/home/neople/game）
 
