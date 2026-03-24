@@ -32,30 +32,45 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: 查看项目信息
-        shell: cmd
+      # 对于 C++ 项目，安装 Visual Studio 构建工具
+      - name: 安装 Visual Studio 构建工具
         run: |
-          cd Client\Fd
-          dir *.csproj *.vbproj 2>nul || echo No project files found
-          type Fd.sln | findstr /i "GlobalSection.*SolutionConfigurationPlatforms" -A 10
+          choco install visualstudio2022buildtools -y
+          choco install visualstudio2022-workload-vctools -y
+        continue-on-error: true
 
+      # 编译项目 - 使用 Win32 平台
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          # 尝试方式1：不指定平台
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release || \
-          # 尝试方式2：使用 AnyCPU
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release /p:Platform="AnyCPU" || \
-          # 尝试方式3：使用 .NET build
-          dotnet build "Client/Fd/Fd.sln" -c Release
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143
           
       - name: 收集编译的插件
         run: |
           mkdir output
-          # 查找编译输出的 dll 文件
-          dir /s /b Client\Fd\bin\Release\*.dll 2>nul || dir /s /b Client\Fd\bin\AnyCPU\Release\*.dll
-          xcopy "Client\Fd\bin\Release\*.dll" "output\" /y /s /q 2>nul
-          xcopy "Client\Fd\bin\AnyCPU\Release\*.dll" "output\" /y /s /q 2>nul
-          xcopy "Client\Fd\bin\*.dll" "output\" /y /s /q 2>nul
+          echo "Searching for compiled dll files..."
+          
+          # 显示目录结构以便调试
+          echo "Directory structure:"
+          dir /s /b Client\Fd\*.dll
+          
+          # 查找 Fd.dll 文件（可能在多个位置）
+          if exist "Client\Fd\Fd.dll" (
+            echo "Found Fd.dll in Client\Fd"
+            copy "Client\Fd\Fd.dll" "output\"
+          ) elseif exist "Client\Fd\Win32\Release\Fd.dll" (
+            echo "Found Fd.dll in Win32\Release"
+            copy "Client\Fd\Win32\Release\Fd.dll" "output\"
+          ) elseif exist "Client\Fd\Release\Fd.dll" (
+            echo "Found Fd.dll in Release"
+            copy "Client\Fd\Release\Fd.dll" "output\"
+          ) else (
+            echo "Fd.dll not found in common locations!"
+            echo "Searching all locations:"
+            dir /s Client\Fd\Fd.dll
+          )
+          
+          echo "Files in output:"
+          dir output
 
       # 发布到 Releases
       - name: 上传到GitHub Releases
