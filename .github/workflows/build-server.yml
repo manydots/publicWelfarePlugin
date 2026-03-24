@@ -19,16 +19,12 @@ jobs:
         run: |
           git submodule update --init Server
 
-      # ======================
-      # 版本号：server-v1.0.0
-      # ======================
       - name: 生成Server发布版本号
         id: version
+        shell: bash
         run: |
           new_tag="server-v1.0.0"
-          
           latest=$(gh release list --json tagName --jq '.[0].tagName' 2>/dev/null || true)
-          
           if [ -n "$latest" ] && [[ $latest =~ server-v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             major=${BASH_REMATCH[1]}
             minor=${BASH_REMATCH[2]}
@@ -36,8 +32,6 @@ jobs:
             new_patch=$((patch + 1))
             new_tag="server-v$major.$minor.$new_patch"
           fi
-          
-          echo "新版本号: $new_tag"
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
