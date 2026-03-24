@@ -29,22 +29,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 启用VS编译工具
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 输出x86
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /t:Rebuild /p:Configuration=Release /p:Platform=x86 /p:PlatformToolset=v143 /p:CXX_STANDARD=17
+          msbuild "Client/Fd/Fd.sln" /t:Rebuild /p:Configuration=Release /p:PlatformToolset=v143 /p:CXX_STANDARD=17
 
-      # 复制输出文件
-      - name: 收集插件
+      - name: 收集编译的插件
         run: |
           mkdir output
-          copy "Client\Fd\Fd.dll" "output\"
-          copy "Client\Fd\x86\Release\Fd.dll" "output\"
-          copy "Client\Fd\Release\Fd.dll" "output\"
+          xcopy "Client\Fd\Fd.dll" "output\" /y /q
+          xcopy "Client\Fd\*\Fd.dll" "output\" /y /q /s
 
       # 发布到 Releases
       - name: 上传到GitHub Releases
