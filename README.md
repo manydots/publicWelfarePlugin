@@ -1,14 +1,16 @@
-# S2开源插件
+# 70S2开源插件源码
 
 ### Actions Workflow
 
-```
-./github/workflows/build-server.yml  服务端插件
-./github/workflows/build-client.yml  客户端插件[重命名中文函数]
-```
+```shell
+# 移除管理项目Actions Workflow构建
+#./github/workflows/build-server.yml  服务端插件
+#./github/workflows/build-client.yml  客户端插件
+
+# 仅修改客户端插件[重命名中文函数(Workflow编译异常)、开启怪物变身riding.cpp]部分，其它代码为70S2开源插件源码
 
 - Client(客户端插件)
-  Fd: Fd.dll（开启怪物变身riding.cpp）
+  Fd: Fd.dll
 - Server(服务端插件)
   monitor: libfd_monitor.so（/home/neople/monitor）
   server: libfd.so（/home/neople/game）
