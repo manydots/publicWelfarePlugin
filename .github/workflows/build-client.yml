@@ -21,7 +21,7 @@ jobs:
         run: |
           new_tag="client-v1.0.0"
           latest=$(gh release list --json tagName --jq '.[0].tagName' 2>/dev/null || true)
-          if [[ -n "$latest" && $latest =~ client-v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+          if [[ -n "$latest" && $latest =~ client-v([0-9]+)\.([0-9]+) ]]; then
             new_tag="client-v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3]+1))"
           fi
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
@@ -31,10 +31,10 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # MSVC 使用 GB2312 编码读取源代码
+      # 强制 MSVC 以 GBK 编码读取源码
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:AdditionalOptions="/utf-8" /p:CharacterSet=Unicode
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86 /p:ClCompile="/source-charset:gbk /execution-charset:gbk"
 
       - name: 收集编译的插件
         run: |
