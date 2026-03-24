@@ -9,11 +9,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Clone Server仓库
+      - name: Clone仓库
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: false
           fetch-depth: 0
+      
+      - name: Clone Server仓库
+        run: |
+          git submodule update --init Server
 
       # ======================
       # 版本号：server-v1.0.0
