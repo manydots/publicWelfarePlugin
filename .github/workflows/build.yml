@@ -1,4 +1,4 @@
-name: CMake编译
+name: CMake插件编译
 
 on:
   workflow_dispatch:
@@ -6,12 +6,37 @@ on:
 jobs:
   build-server:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: 拉取代码
         uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
+
+      # 自动生成版本号
+      - name: 生成发布版本号
+        id: version
+        run: |
+          # 第一次没有任何 Release 时，默认从 v1.0.0 开始
+          new_tag="v1.0.0"
+          
+          # 获取最新版本（如果有）
+          latest=$(gh release list --json tagName --jq '.[0].tagName' 2>/dev/null || true)
+          
+          if [ -n "$latest" ] && [[ $latest =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            major=${BASH_REMATCH[1]}
+            minor=${BASH_REMATCH[2]}
+            patch=${BASH_REMATCH[3]}
+            new_patch=$((patch + 1))
+            new_tag="v$major.$minor.$new_patch"
+          fi
+          
+          echo "新版本号: $new_tag"
+          echo "tag=$new_tag" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # 安装依赖
       - name: 安装32位CMake编译环境
@@ -20,9 +45,9 @@ jobs:
           sudo apt install -y gcc gcc-multilib g++-multilib wget
           sudo -i << 'EOF'
           cd /usr/local
-          wget https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6-linux-x86_64.tar.gz
-          tar -zxvf cmake-3.22.6-linux-x86_64.tar.gz
-          ln -sf /usr/local/cmake-3.22.6-linux-x86_64/bin/cmake /usr/bin/cmake
+          wget https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6-linux-x64.tar.gz
+          tar -zxvf cmake-3.22.6-linux-x64.tar.gz
+          ln -sf /usr/local/cmake-3.22.6-linux-x64/bin/cmake /usr/bin/cmake
           EOF
           cmake --version
 
@@ -32,7 +57,6 @@ jobs:
           cd Server/monitor
           sed -i '1s/^.//' CMakeLists.txt
           sed -i 's|set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|g' CMakeLists.txt
-
           rm -rf build && mkdir build && cd build
           cmake .. -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
           make -j4
@@ -43,19 +67,24 @@ jobs:
           cd Server/server
           sed -i '1s/^.//' CMakeLists.txt
           sed -i 's|set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|g' CMakeLists.txt
-
           rm -rf build && mkdir build && cd build
           cmake .. -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
           make -j4
 
-      - name: 复制编译插件
+      # 整理文件
+      - name: 整理编译插件
         run: |
           mkdir -p output
-          cp Server/monitor/build/libfd_monitor.so output/ || true
-          cp Server/server/build/libfd.so output/ || true
+          cp Server/monitor/build/libfd_monitor.so output/
+          cp Server/server/build/libfd.so output/
 
-      - name: 上传编译插件
-        uses: actions/upload-artifact@v4
+      # 上传到 Releases
+      - name: 发布到 GitHub Releases
+        uses: softprops/action-gh-release@v2
         with:
-          name: plugin-output
-          path: output/
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "自动编译插件 ${{ steps.version.outputs.tag }}"
+          body: "自动编译生成\n libfd_monitor.so\n libfd.so"
+          files: output/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
