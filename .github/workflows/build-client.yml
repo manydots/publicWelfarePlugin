@@ -18,8 +18,16 @@ jobs:
         run: |
           $files = Get-ChildItem -Path "Client\Fd\" -Include *.cpp,*.h -Recurse
           foreach ($file in $files) {
-            $content = Get-Content $file.FullName -Encoding Default -Raw
-            Set-Content $file.FullName -Value $content -Encoding UTF8
+            # 用 GBK 正确读取中文源码
+            $content = Get-Content $file.FullName -Encoding OEM -Raw
+            
+            # 清理掉编译器不认识的特殊符号（解决 C3872）
+            $content = $content -replace '[^\x00-\x7F\u4e00-\u9fa5\s\w\W]', ''
+            
+            # 强制写入 UTF-8 BOM（VS 编译器唯一完全兼容格式）
+            $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+            $bytes = $utf8NoBom.GetBytes($content)
+            [System.IO.File]::WriteAllBytes($file.FullName, $bytes)
           }
 
       - name: 生成Client发布版本号
