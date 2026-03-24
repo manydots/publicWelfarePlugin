@@ -1,10 +1,11 @@
 # S2开源插件
 
 ### Actions Workflow
-```
-./github/workflows/build.yml
-```
 
+```
+./github/workflows/build-server.yml  服务端插件
+./github/workflows/build-client.yml  客户端插件
+```
 
 - Client(客户端插件)
   Fd: Fd.dll（开启怪物变身riding.cpp）

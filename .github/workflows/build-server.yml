@@ -1,4 +1,4 @@
-name: CMake插件编译
+name: Server插件编译
 
 on:
   workflow_dispatch:
@@ -15,22 +15,22 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      # 自动生成版本号
-      - name: 生成发布版本号
+      # ======================
+      # 版本号：server-v1.0.0
+      # ======================
+      - name: 生成Server发布版本号
         id: version
         run: |
-          # 第一次没有任何 Release 时，默认从 v1.0.0 开始
-          new_tag="v1.0.0"
+          new_tag="server-v1.0.0"
           
-          # 获取最新版本（如果有）
           latest=$(gh release list --json tagName --jq '.[0].tagName' 2>/dev/null || true)
           
-          if [ -n "$latest" ] && [[ $latest =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+          if [ -n "$latest" ] && [[ $latest =~ server-v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             major=${BASH_REMATCH[1]}
             minor=${BASH_REMATCH[2]}
             patch=${BASH_REMATCH[3]}
             new_patch=$((patch + 1))
-            new_tag="v$major.$minor.$new_patch"
+            new_tag="server-v$major.$minor.$new_patch"
           fi
           
           echo "新版本号: $new_tag"
@@ -45,9 +45,9 @@ jobs:
           sudo apt install -y gcc gcc-multilib g++-multilib wget
           sudo -i << 'EOF'
           cd /usr/local
-          wget https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6-linux-x64.tar.gz
-          tar -zxvf cmake-3.22.6-linux-x64.tar.gz
-          ln -sf /usr/local/cmake-3.22.6-linux-x64/bin/cmake /usr/bin/cmake
+          wget https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6-linux-x86_64.tar.gz
+          tar -zxvf cmake-3.22.6-linux-x86_64.tar.gz
+          ln -sf /usr/local/cmake-3.22.6-linux-x86_64/bin/cmake /usr/bin/cmake
           EOF
           cmake --version
 
