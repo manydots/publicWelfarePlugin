@@ -83,8 +83,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "自动编译插件 ${{ steps.version.outputs.tag }}"
-          body: "自动编译生成\n libfd_monitor.so\n libfd.so"
+          name: "${{ steps.version.outputs.tag }}"
+          body: "服务端插件\n libfd_monitor.so\n libfd.so"
           files: output/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
