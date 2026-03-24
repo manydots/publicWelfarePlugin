@@ -37,16 +37,15 @@ jobs:
           arch: x86
           vsversion: 2022
 
-      # GBK 中文源码编译参数
       - name: 编译 Client/Fd/Fd.sln
         run: |
           msbuild "Client/Fd/Fd.sln" `
             /p:Configuration=Home `
             /p:Platform=x86 `
             /p:LanguageStandard=stdcpp17 `
-            /p:AdditionalOptions="/permissive /Zc:char8_t- /Zc:strictStrings- /utf-8- /source-charset:GBK /execution-charset:GBK" `
             /p:Charset=Unicode `
-            /p:ForceUsingUtf8Encoding=false
+            /p:ForceUsingUtf8Encoding=false `
+            /p:ClCompile="/permissive /Zc:char8_t- /Zc:strictStrings- /utf-8- /source-charset:GBK /execution-charset:GBK"
 
       - name: 整理编译插件
         run: |
