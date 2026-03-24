@@ -3,8 +3,35 @@
 - Client(客户端插件)
   Fd: Fd.dll（开启怪物变身riding.cpp）
 - Server(服务端插件)
-  monitor: fd_monitor.so（/home/neople/monitor）
-  server: fd.so（/home/neople/game）
+  monitor: libfd_monitor.so（/home/neople/monitor）
+  server: libfd.so（/home/neople/game）
+
+### 插件使用
+
+```shell
+# 客户端插件
+# (客户端插件关闭绑定IP fixIp())
+# 客户端加载Fd.dll
+
+# 服务端插件
+# 插件上传
+# libfd_monitor.so -> /home/neople/monitor
+# libfd.so -> /home/neople/game
+
+# run文件修改
+
+# 服务器名称
+SERVER_NAME="siroco"
+
+# ...
+# df_monitor_r
+LD_PRELOAD="./libfd_monitor.so" ./df_monitor_r mnt_${SERVER_NAME} start &
+
+# ...
+# df_game_r
+LD_PRELOAD="./libfd.so" ./df_game_r "${SERVER_NAME}11" start &
+
+```
 
 ### Linux Cmake环境安装
 
