@@ -1,0 +1,6 @@
+[submodule "Client"]
+	path = Client
+	url = https://github.com/manydots/Client.git
+[submodule "Server"]
+	path = Server
+	url = https://github.com/manydots/Server.git
