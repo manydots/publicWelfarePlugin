@@ -45,13 +45,17 @@ jobs:
             /p:LanguageStandard=stdcpp17 `
             /p:Charset=Unicode `
             /p:ForceUsingUtf8Encoding=false `
-            /p:ClCompile="/permissive- /Zc:char8_t- /Zc:strictStrings- /utf-8 /source-charset:GBK /execution-charset:GBK"
+            /p:ClCompile="/permissive- /Zc:char8_t- /Zc:strictStrings- /Zc:identifier-char- /utf-8 /source-charset:GBK /execution-charset:GBK"
 
       - name: 整理编译插件
         run: |
           mkdir output
-          xcopy "Client\Fd\x86\Home\*.dll" "output\" /y /s /q
-          xcopy "Client\Fd\*.dll" "output\" /y /s /q
+          if (Test-Path "Client\Fd\x86\Home\*.dll") {
+            xcopy "Client\Fd\x86\Home\*.dll" "output\" /y /s /q
+          }
+          if (Test-Path "Client\Fd\*.dll") {
+            xcopy "Client\Fd\*.dll" "output\" /y /s /q
+          }
 
       - name: 上传到GitHub Releases
         uses: softprops/action-gh-release@v2
