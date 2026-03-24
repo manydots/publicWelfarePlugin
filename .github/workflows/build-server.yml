@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: 拉取代码
+      - name: Clone Server仓库
         uses: actions/checkout@v4
         with:
           submodules: true

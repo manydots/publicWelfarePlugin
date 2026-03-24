@@ -9,13 +9,16 @@ jobs:
       contents: write
 
     steps:
-      - name: 拉取代码
+      - name: Clone仓库
         uses: actions/checkout@v4
         with:
           submodules: false
           fetch-depth: 0
-          sparse-checkout: |
-            Client
+
+      - name: Clone Client子仓库
+        run: |
+          git submodule update --init Client
+
 
       - name: 编码转换
         run: |
