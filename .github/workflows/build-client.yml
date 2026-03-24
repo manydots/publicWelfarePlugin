@@ -15,24 +15,16 @@ jobs:
         with:
           submodules: true
 
-      # ======================
-      # 版本号：client-v1.0.0
-      # ======================
-      - name: 生成客户端版本号
+      # 客户端独立版本号：client-v1.0.0
+      - name: 生成Client发布版本号
         id: version
         shell: bash
         run: |
           new_tag="client-v1.0.0"
           latest=$(gh release list --json tagName --jq '.[0].tagName' 2>/dev/null || true)
-          
           if [[ -n "$latest" && $latest =~ client-v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
-            major=${BASH_REMATCH[1]}
-            minor=${BASH_REMATCH[2]}
-            patch=${BASH_REMATCH[3]}
-            new_patch=$((patch + 1))
-            new_tag="client-v$major.$minor.$new_patch"
+            new_tag="client-v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3]+1))"
           fi
-          
           echo "tag=$new_tag" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,30 +33,20 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # ======================
-      # 仅编译 x86 C++17
-      # ======================
+      # 编译 x86 C++17（修复PowerShell格式）
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" ^
-          /t:Rebuild ^
-          /p:Configuration=Release ^
-          /p:Platform=Win32 ^
-          /p:PlatformToolset=v143 ^
-          /p:CXX_STANDARD=17
+          msbuild "Client/Fd/Fd.sln" /t:Rebuild /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:CXX_STANDARD=17
 
-      # ======================
-      # 提取编译好的 x86 DLL
-      # ======================
+      # 提取编译好的插件
       - name: 收集插件
         run: |
           mkdir output
-          xcopy "Client\Fd\Win32\Release\*.dll" "output\" /y
-          xcopy "Client\Fd\Release\*.dll" "output\" /y
+          copy "Client\Fd\Fd.dll" "output\"
+          copy "Client\Fd\Win32\Release\Fd.dll" "output\"
+          copy "Client\Fd\Release\Fd.dll" "output\"
 
-      # ======================
       # 发布到 Releases
-      # ======================
       - name: 上传到GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
