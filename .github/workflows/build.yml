@@ -18,10 +18,12 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y gcc gcc-multilib g++-multilib wget
+          sudo -i << 'EOF'
           cd /usr/local
           wget https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6-linux-x86_64.tar.gz
           tar -zxvf cmake-3.22.6-linux-x86_64.tar.gz
-          sudo ln -sf /usr/local/cmake-3.22.6-linux-x86_64/bin/cmake /usr/bin/cmake
+          ln -sf /usr/local/cmake-3.22.6-linux-x86_64/bin/cmake /usr/bin/cmake
+          EOF
           cmake --version
 
       # 编译 monitor
