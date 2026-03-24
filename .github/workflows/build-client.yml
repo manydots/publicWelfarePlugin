@@ -14,6 +14,14 @@ jobs:
         with:
           submodules: true
 
+      - name: 编码转换
+        run: |
+          $files = Get-ChildItem -Path "Client\Fd\" -Include *.cpp,*.h -Recurse
+          foreach ($file in $files) {
+            $content = Get-Content $file.FullName -Encoding Default -Raw
+            Set-Content $file.FullName -Value $content -Encoding UTF8
+          }
+
       - name: 生成Client发布版本号
         id: version
         shell: bash
@@ -42,10 +50,7 @@ jobs:
           msbuild "Client/Fd/Fd.sln" `
             /p:Configuration=Home `
             /p:Platform=x86 `
-            /p:LanguageStandard=stdcpp17 `
-            /p:Charset=Unicode `
-            /p:ForceUsingUtf8Encoding=false `
-            /p:ClCompile="/permissive- /Zc:char8_t- /Zc:strictStrings- /Zc:identifier-char- /utf-8 /source-charset:GBK /execution-charset:GBK"
+            /p:LanguageStandard=stdcpp17
 
       - name: 整理编译插件
         run: |
