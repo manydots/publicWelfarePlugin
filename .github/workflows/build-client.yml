@@ -32,14 +32,30 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: 查看项目信息
+        shell: cmd
+        run: |
+          cd Client\Fd
+          dir *.csproj *.vbproj 2>nul || echo No project files found
+          type Fd.sln | findstr /i "GlobalSection.*SolutionConfigurationPlatforms" -A 10
+
       - name: 编译 Client/Fd/Fd.sln
         run: |
-          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release /p:Platform="Any CPU"
+          # 尝试方式1：不指定平台
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release || \
+          # 尝试方式2：使用 AnyCPU
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Release /p:Platform="AnyCPU" || \
+          # 尝试方式3：使用 .NET build
+          dotnet build "Client/Fd/Fd.sln" -c Release
           
       - name: 收集编译的插件
         run: |
           mkdir output
-          xcopy "Client\Fd\*.dll" "output\" /y /s /q
+          # 查找编译输出的 dll 文件
+          dir /s /b Client\Fd\bin\Release\*.dll 2>nul || dir /s /b Client\Fd\bin\AnyCPU\Release\*.dll
+          xcopy "Client\Fd\bin\Release\*.dll" "output\" /y /s /q 2>nul
+          xcopy "Client\Fd\bin\AnyCPU\Release\*.dll" "output\" /y /s /q 2>nul
+          xcopy "Client\Fd\bin\*.dll" "output\" /y /s /q 2>nul
 
       # 发布到 Releases
       - name: 上传到GitHub Releases
