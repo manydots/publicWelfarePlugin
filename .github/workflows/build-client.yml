@@ -31,43 +31,9 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 查看配置
-      - name: 查看项目配置
-        shell: cmd
-        run: |
-          cd Client\Fd
-          echo "=== Solution file content (first 50 lines) ==="
-          type Fd.sln | more
-          echo ""
-          echo "=== Searching for configurations in vcxproj ==="
-          findstr /i "Configuration" Fd.vcxproj
-          echo ""
-          echo "=== Trying to build with default configuration ==="
-          msbuild Fd.sln /p:Configuration=Release /target:ValidateSolutionConfiguration
-
       - name: 编译项目
-        shell: cmd
         run: |
-          cd Client\Fd
-          
-          # 方式1：不指定平台
-          echo "=== Trying with no platform ==="
-          msbuild Fd.sln /p:Configuration=Release
-          
-          if %errorlevel% neq 0 (
-            echo "=== Trying with x86 platform ==="
-            msbuild Fd.sln /p:Configuration=Release /p:Platform=x86
-          )
-          
-          if %errorlevel% neq 0 (
-            echo "=== Trying with AnyCPU platform ==="
-            msbuild Fd.sln /p:Configuration=Release /p:Platform="Any CPU"
-          )
-          
-          if %errorlevel% neq 0 (
-            echo "=== Trying to build vcxproj directly ==="
-            msbuild Fd.vcxproj /p:Configuration=Release /p:Platform=Win32
-          )
+          msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86
           
       - name: 收集编译的插件
         run: |
