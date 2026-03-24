@@ -15,6 +15,9 @@ jobs:
         with:
           submodules: true
 
+      - name: 设置系统编码为 GBK
+        run: chcp 936
+
       - name: 生成Client发布版本号
         id: version
         shell: bash
@@ -31,33 +34,17 @@ jobs:
       - name: 安装MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: 编译项目
+      # 编译命令
+      - name: 编译 Client/Fd/Fd.sln
         run: |
           msbuild "Client/Fd/Fd.sln" /p:Configuration=Home /p:Platform=x86
-          
+
       - name: 收集编译的插件
         run: |
           mkdir output
-          echo "Searching for Fd.dll..."
-          
-          # 搜索所有位置的 Fd.dll
-          for /r Client %%f in (Fd.dll) do (
-            echo "Found: %%f"
-            copy "%%f" output\
-          )
-          
-          echo "Files in output:"
-          dir output
-          if exist output\Fd.dll (
-            echo "Successfully collected Fd.dll"
-          ) else (
-            echo "ERROR: Fd.dll not found!"
-            echo "Full directory listing:"
-            dir /s Client
-          )
+          xcopy "Client\Fd\*.dll" "output\" /y /s /q
 
       - name: 上传到GitHub Releases
-        if: success() && hashFiles('output/Fd.dll') != ''
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
