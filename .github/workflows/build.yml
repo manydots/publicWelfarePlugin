@@ -31,6 +31,8 @@ jobs:
         run: |
           cd Server/monitor
           sed -i '1s/^.//' CMakeLists.txt
+          sed -i 's|set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|g' CMakeLists.txt
+
           rm -rf build && mkdir build && cd build
           cmake .. -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
           make -j4
@@ -40,9 +42,20 @@ jobs:
         run: |
           cd Server/server
           sed -i '1s/^.//' CMakeLists.txt
+          sed -i 's|set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY|g' CMakeLists.txt
+
           rm -rf build && mkdir build && cd build
           cmake .. -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
           make -j4
 
-      - name: 编译完成
-        run: echo "插件编译成功"
+      - name: 复制编译插件
+        run: |
+          mkdir -p output
+          cp Server/monitor/build/libfd_monitor.so output/ || true
+          cp Server/server/build/libfd.so output/ || true
+
+      - name: 上传编译插件
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-output
+          path: output/
