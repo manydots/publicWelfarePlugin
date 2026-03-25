@@ -45,7 +45,7 @@ on:
 
 ```shell
 # 客户端插件
-# (客户端插件关闭绑定IP fixIp())
+# 客户端插件关闭绑定IP fixIp()
 # 客户端加载Fd.dll
 
 # 服务端插件
@@ -115,3 +115,4 @@ make -j4
 
 - [Cloudflare](https://developers.cloudflare.com/warp-client/get-started/windows/)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/downloads/)
+- [inifile](https://github.com/Gaaagaa/inifile)
