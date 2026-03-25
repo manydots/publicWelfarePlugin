@@ -22,7 +22,8 @@
 ```
 
 <div align="center">
-  <img src="https://github.com/manydots/publicWelfarePlugin/raw/main/screenshot/server-workflow.png" width="800">
+  <img src="https://github.com/manydots/publicWelfarePlugin/raw/main/screenshot/server-workflow.png" width="100%">
+  <img src="https://github.com/manydots/publicWelfarePlugin/raw/main/screenshot/client-workflow.png" width="100%">
 </div>
 
 ### 插件使用
