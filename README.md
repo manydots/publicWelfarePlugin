@@ -1,19 +1,27 @@
 # 70S2开源插件源码
 
+仅修改客户端插件（重命名中文函数(Workflow编译异常)、开启怪物变身riding.cpp）部分，其它代码为S2开源插件源码
+
+## 项目结构
+
+### 子仓库
+
+- **客户端**：[Client](https://github.com/manydots/Client)
+- **服务端**：[Server](https://github.com/manydots/Server)
+
+| 模块                 | 插件名称         | 部署路径             |
+| -------------------- | ---------------- | -------------------- |
+| Client（客户端插件） | Fd.dll           | 客户端目录           |
+| Server（服务端插件） | libfd_monitor.so | /home/neople/monitor |
+|                      | libfd.so         | /home/neople/game    |
+
 ### Actions Workflow
 
 ```shell
 # 移除管理项目Actions Workflow构建
-#./github/workflows/build-server.yml  服务端插件
-#./github/workflows/build-client.yml  客户端插件
-
-# 仅修改客户端插件[重命名中文函数(Workflow编译异常)、开启怪物变身riding.cpp]部分，其它代码为70S2开源插件源码
-
-- Client(客户端插件)
-  Fd: Fd.dll
-- Server(服务端插件)
-  monitor: libfd_monitor.so（/home/neople/monitor）
-  server: libfd.so（/home/neople/game）
+# ./github/workflows/build-server.yml  服务端插件
+# ./github/workflows/build-client.yml  客户端插件
+```
 
 ### 插件使用
 
