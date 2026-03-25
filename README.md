@@ -1,6 +1,6 @@
 # 70S2开源插件源码
 
-仅修改客户端插件（重命名中文函数Workflow编译异常、开启怪物变身riding.cpp）部分，其它为S2开源插件源码
+仅修改客户端插件（重命名中文函数、开启怪物变身）部分，其他为S2开源插件源码
 
 ## 项目结构
 
@@ -111,7 +111,7 @@ cmake .. -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
 make -j4
 ```
 
-### 其它资源
+### 其他资源
 
 - [Cloudflare](https://developers.cloudflare.com/warp-client/get-started/windows/)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/downloads/)
