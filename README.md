@@ -15,10 +15,24 @@
 
 ### Actions Workflow
 
-```shell
-# 移除管理项目Actions Workflow构建
+```yaml
+# 移除管理项目Actions Workflow构建，使用workflow_dispatch触发构建
 # ./github/workflows/build-server.yml  服务端插件
 # ./github/workflows/build-client.yml  客户端插件
+
+#...
+
+# 手动触发
+on:
+  workflow_dispatch:
+
+# push触发
+on:
+  push:
+    branches: [ main ]
+
+# ...
+
 ```
 
 <div align="center">
